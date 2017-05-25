@@ -1,23 +1,61 @@
+/*********************************
+
+  Magic Mirror Module: 
+  MMM-MyTTC
+  https://github.com/jclarke0000/MMM-MyTTC
+
+  By Jeff Clarke
+  MIT Licensed
+ 
+*********************************/
+
 var NodeHelper = require("node_helper");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 var convert = require('xml-js');
 
 module.exports = NodeHelper.create({
 
+  webServiceURL: "http://webservices.nextbus.com/service/publicXMLFeed",
+  agency: "ttc",
+  dataRetriver: null,
+
   start: function() {
     console.log("Starting node_helper for module: " + this.name);
+    this.started = false;
   },
 
   socketNotificationReceived: function(notification, payload){
     if (notification === 'MMM-MYTTC-GET') {
-      this.configRouteList = payload.routeList;
-      this.getTTCTimes( payload.url );
+
+      this.url = '';
+      this.config = payload;
+
+      var builtURL = this.webServiceURL + "?&command=predictionsForMultiStops&a=" + this.agency;
+
+      var routes = this.config.routeList;
+      for (var i = 0; i < routes.length; i++) {
+        builtURL += "&stops=" + routes[i].routeNo + "|" + routes[i].stop;
+      }
+
+      this.url = builtURL;
+
+      //first data pull
+      this.getTTCTimes();
+
+      if (!this.started) {
+        this.started = true;
+        
+
+        //recurring data pull
+        var self = this;
+        this.dataRetriver = setInterval(function() {
+          self.getTTCTimes();
+        }, this.config.updateInterval);
+      }
     }
   },
 
-  configRouteList: [],
-
-  getTTCTimes: function(url) {
+  getTTCTimes: function() {
     
     var self = this;
 
@@ -29,7 +67,7 @@ module.exports = NodeHelper.create({
         self.sendSocketNotification('MMM-MYTTC-RESPONSE', {data:null});
       }
     }
-    xmlHttp.open("GET", url, true); // true for asynchronous 
+    xmlHttp.open("GET", self.url, true); // true for asynchronous 
     xmlHttp.send(null);
 
   },
@@ -41,7 +79,6 @@ module.exports = NodeHelper.create({
     if (titlePieces[1].indexOf(" towards ") != -1) {
       assembledTitle += " to " + titlePieces[1].split(" towards ")[1];
     }
-    console.log("=========> " + assembledTitle);
 
     return assembledTitle;
   },
@@ -103,14 +140,14 @@ module.exports = NodeHelper.create({
     //reorder resultList to match config order
     var self = this;
     var routeList = new Array();
-    for (var i = 0; i < this.configRouteList.length; i++) {
+    for (var i = 0; i < this.config.routeList.length; i++) {
       var matchingElement = resultList.find(function(el) {
-        if (el.routeNo == self.configRouteList[i].routeNo && el.stopTag == self.configRouteList[i].stop) {
-          if (self.configRouteList[i].label) {
-            el.routeTitle = self.configRouteList[i].label;
+        if (el.routeNo == self.config.routeList[i].routeNo && el.stopTag == self.config.routeList[i].stop) {
+          if (self.config.routeList[i].label) {
+            el.routeTitle = self.config.routeList[i].label;
           }
-          if (self.configRouteList[i].color) {
-            el.color = self.configRouteList[i].color;
+          if (self.config.routeList[i].color) {
+            el.color = self.config.routeList[i].color;
           } 
           return el;
         }

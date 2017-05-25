@@ -1,4 +1,13 @@
+/*********************************
 
+  Magic Mirror Module: 
+  MMM-MyTTC
+  https://github.com/jclarke0000/MMM-MyTTC
+
+  By Jeff Clarke
+  MIT Licensed
+ 
+*********************************/
 
 Module.register('MMM-MyTTC', {
 
@@ -24,8 +33,6 @@ Module.register('MMM-MyTTC', {
     updateInterval: 60000, //update every minute
   },
 
-  webServiceURL: "http://webservices.nextbus.com/service/publicXMLFeed",
-  agency: "ttc",
 
   // Define required styles.
   getStyles: function () {
@@ -47,45 +54,25 @@ Module.register('MMM-MyTTC', {
 
     Log.info('Starting module: ' + this.name);
 
-    //set up config
-    this.payload = new Object();
+    this.loaded = false; 
     this.ttcData = null;
-    var builtURL = this.webServiceURL + "?&command=predictionsForMultiStops&a=" + this.agency;
 
-    var routes = this.config.routeList;
-    for (var i = 0; i < routes.length; i++) {
-      builtURL += "&stops=" + routes[i].routeNo + "|" + routes[i].stop;
-    }
-    console.log(builtURL);
-
-    this.payload = {url : builtURL, routeList: this.config.routeList};
-
-    this.loaded = false;
-
-
-    //first data request
-    this.getTimes();
-
-    //recurring data request
-    var self = this;
-    setInterval(function(){
-      self.getTimes();
-    }, this.config.updateInterval);
-
-      
-  },
-
-  getTimes: function() {
-    this.sendSocketNotification("MMM-MYTTC-GET", this.payload);    
+    //strat getting data
+    this.sendSocketNotification("MMM-MYTTC-GET", this.config);    
   },
 
   socketNotificationReceived: function(notification, payload) {
     //only update if a data set is returned.  Otherwise leave stale data on the screen.
     if ( notification === 'MMM-MYTTC-RESPONSE' && payload != null) {
-      this.loaded = true;
-      console.log(payload);
       this.ttcData = payload;
-      this.updateDom();
+
+      //only fade in tye module after the first data pull
+      if (!this.loaded) {
+        this.loaded = true;
+        this.updateDom(2000);
+      } else {
+        this.updateDom();
+      }
     }
 
   },
@@ -109,7 +96,6 @@ Module.register('MMM-MyTTC', {
 
       //skip entries with no scheduled times
       if (this.ttcData[i].noSchedule) {
-        console.log("====================> No Schedule");
         continue;
       }
 
