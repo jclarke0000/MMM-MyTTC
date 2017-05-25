@@ -1,0 +1,101 @@
+.MMM-MyTTC .route-container {
+  position: relative;
+  padding: 1px;
+  border-bottom: solid 1px #222;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.MMM-MyTTC .route-title {
+  display: block;
+  font-size: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 25px;
+  margin-left: 30px;
+}
+
+.MMM-MyTTC .route-title .route-no {
+  display: inline-block;
+  background-color: #FF0000;
+  border: solid 2px #FF0000;
+  line-height: 19px;
+  border-radius: 5px;
+  font-weight: 700;
+  text-align: center;
+  width: 40px;
+}
+
+.MMM-MyTTC .route-container.express .route-title .route-no {
+  background-color: #00A651;
+  border-color: #00A651;
+}
+
+.MMM-MyTTC .route-container.downtown-express .route-title .route-no {
+  background-color: #FFFFFF;
+  border-color: #00A651;
+  color: #00A651;
+}
+
+.MMM-MyTTC .route-container.all-night .route-title .route-no {
+  background-color: #FFFFFF;
+  border-color: #00A8D2;
+  color: #00A8D2;
+}
+
+
+.MMM-MyTTC .route-container.community .route-title .route-no {
+  background-color: #FFFFFF;
+  border-color: #808080;
+  color: #808080;
+}
+
+
+.MMM-MyTTC .stop-title {
+  display: block;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 18px;
+  margin-left: 30px;
+  margin-bottom: 12px;
+}
+
+.MMM-MyTTC .branch-container {
+  font-size: 16px;
+  line-height: 18px;
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.MMM-MyTTC .branch-container .branch-title {
+  display: block;
+  margin-left: 30px;
+  margin-right: 100px;
+  text-transform: uppercase;
+}
+
+.MMM-MyTTC .branch-container .next-vehicles {
+  text-align: right;
+  white-space: nowrap;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+
+}
+
+.MMM-MyTTC .transit-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: currentColor;
+  position: absolute;
+  top: 2px;
+  left: 0px;
+}
+
+.MMM-MyTTC .branch-container .next-vehicles .arriving-soon {  
+  color: #a3ea80;
+}

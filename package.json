@@ -1,0 +1,15 @@
+{
+  "name": "mmmmyttc",
+  "version": "1.0.0",
+  "description": "Toronto Transit Module for MagicMirror",
+  "main": "MMM-MyTTC.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jeff Clarke",
+  "license": "ISC",
+  "dependencies": {
+    "xml-js": "^1.3.2",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
