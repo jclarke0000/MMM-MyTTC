@@ -5,6 +5,9 @@ This a module for [MagicMirror](https://github.com/MichMich/MagicMirror/tree/dev
 It shows you how long you'll need to wait next for the next TTC (Toronto Transit) bus or streetcar on your route.
 Sadly, TTC's public API doesn't provide subway schedules.  As such, this module doesn't provide subway times.
 
+![Screenshot](/../screenshots/MMM-MyTTC.png?raw=true "Screenshot")
+
+
 ## Installation
 1. Navigate into your MagicMirror `modules` folder and execute<br>
 `git clone https://github.com/jclarke0000/MMM-MyCommute.git`.
