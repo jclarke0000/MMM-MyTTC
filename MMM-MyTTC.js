@@ -44,7 +44,7 @@ Module.register('MMM-MyTTC', {
     var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
     svg.setAttributeNS(null, "class", "transit-mode-icon");
     var use = document.createElementNS('http://www.w3.org/2000/svg', "use");
-    use.setAttributeNS("http://www.w3.org/1999/xlink", "href", "modules/MMM-MyCommute/icon_sprite.svg#" + glyph);
+    use.setAttributeNS("http://www.w3.org/1999/xlink", "href", this.file("icon_sprite.svg#") + glyph);
     svg.appendChild(use);
     
     return(svg);
