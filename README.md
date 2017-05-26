@@ -1,6 +1,6 @@
 # MMM-MyTTC
 
-This a module for the [MagicMirror](https://github.com/MichMich/MagicMirror/tree/develop).
+This a module for [MagicMirror](https://github.com/MichMich/MagicMirror/tree/develop).
 
 It shows you how long you'll need to wait next for the next TTC (Toronto Transit) bus or streetcar on your route.
 Sadly, TTC's public API doesn't provide subway schedules.  As such, this module doesn't provide subway times.
@@ -22,18 +22,18 @@ Sadly, TTC's public API doesn't provide subway schedules.  As such, this module 
   <tbody>
     <tr>
       <td><code>routeList</code></td>
-      <td>**REQUIRED** An array of route numbers and stop number pairs.<br><br>**type** <code>Array</code><br />See below for more instructions on configuring your `routeList`.</td>
+      <td><strong>REQUIRED</strong> An array of route numbers and stop number pairs.<br><br><strong>Type</strong> <code>Array</code><br />See below for more instructions on configuring your `routeList`.</td>
     </tr>
     <tr>
       <td><code>updateInterval</code></td>
-      <td>How frequently in milliseconds to poll for data from TTC's public API.<br><br>**type** <code>Integer</code><br>Defaults to <code>60000</code> (i.e.: 1 minute)</td>
+      <td>How frequently in milliseconds to poll for data from TTC's public API.<br><br><strong>Type</strong> <code>Integer</code><br>Defaults to <code>60000</code> (i.e.: 1 minute)</td>
     </tr>
   </tbody>
 </table>
 
 ## Configuring your routeList
 
-Each entry in your `routeList` consists of a route number and stop number
+Each entry in your `routeList` consists of a route number and stop number.
 
 First determine which routes you're interested in (e.g.: `501` for the Queen St. streetcar). The full list of routes are listed here:
 http://webservices.nextbus.com/service/publicXMLFeed?command=routeList&a=ttc
