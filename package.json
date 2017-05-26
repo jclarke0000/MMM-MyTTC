@@ -9,7 +9,6 @@
   "author": "Jeff Clarke",
   "license": "ISC",
   "dependencies": {
-    "xml-js": "^1.3.2",
     "xmlhttprequest": "^1.8.0"
   }
 }

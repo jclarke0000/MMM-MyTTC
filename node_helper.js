@@ -11,17 +11,16 @@
 
 var NodeHelper = require("node_helper");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-var convert = require('xml-js');
 
 module.exports = NodeHelper.create({
 
-  webServiceURL: "http://webservices.nextbus.com/service/publicXMLFeed",
+  webServiceURL: "http://webservices.nextbus.com/service/publicJSONFeed",
   agency: "ttc",
   dataRetriver: null,
 
   start: function() {
     console.log("Starting node_helper for module: " + this.name);
-    this.started = false;
+    this.dataPollStarted = false;
   },
 
   socketNotificationReceived: function(notification, payload){
@@ -38,12 +37,13 @@ module.exports = NodeHelper.create({
       }
 
       this.url = builtURL;
+      //console.log("=============>" + this.url);
 
       //first data pull
       this.getTTCTimes();
 
-      if (!this.started) {
-        this.started = true;
+      if (!this.dataPollStarted) {
+        this.dataPollStarted = true;
         
 
         //recurring data pull
@@ -62,7 +62,7 @@ module.exports = NodeHelper.create({
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
       if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { //good
-        self.processXML(xmlHttp.responseText);
+        self.processJSON(xmlHttp.responseText);
       } else if (xmlHttp.readyState == 4) { //bad...
         self.sendSocketNotification('MMM-MYTTC-RESPONSE', {data:null});
       }
@@ -83,50 +83,73 @@ module.exports = NodeHelper.create({
     return assembledTitle;
   },
 
-  processXML: function(xmlText) {
+  processJSON: function(JSONText) {
 
     var resultList = new Array;
+    var rawJSON = JSON.parse(JSONText);
 
-    //convert XML to JSON object because I fucking hate working with XML
-    var rawJSON = convert.xml2js(xmlText, {compact: true, alwaysArray: true});
+    //for some reason, the JSON feed does not place single child
+    //predictions in an array.  So we need to fake it in order for
+    //iteration to work.  Also repeated below for directions and
+    //predictionswithin directions.
+    var predictionsArray = new Array();
+    if (rawJSON.predictions.length) {
+      predictionsArray = rawJSON.predictions
+    } else {
+      predictionsArray.push(rawJSON.predictions);
+    }
+    for (var i = 0; i < predictionsArray.length; i++) {
 
-    for (var i = 0; i < rawJSON.body[0].predictions.length; i++) {
-
-      var p = rawJSON.body[0].predictions[i];
-      var routeTitlePieces = p._attributes.routeTitle.split("-");
+      var p = predictionsArray[i];
+      var routeTitlePieces = p.routeTitle.split("-");
       routeTitlePieces.shift(); //remove the route number from the title
       var route = new Object({
-        routeNo : Number(p._attributes.routeTag),
-        stopTag : Number(p._attributes.stopTag),
+        routeNo : Number(p.routeTag),
+        stopTag : Number(p.stopTag),
         routeTitle : routeTitlePieces.join(" "), 
-        stopTitle : p._attributes.stopTitle,
+        stopTitle : p.stopTitle,
       });
 
       route.branches = new Array();
 
       var assembledTitle;
 
-      if (p._attributes.dirTitleBecauseNoPredictions) { //no data for this route
+      if (p.dirTitleBecauseNoPredictions) { //no data for this route
         route.noSchedule = true,
         route.branches.push({
-          title: this.formatTitle(p._attributes.dirTitleBecauseNoPredictions),
+          title: this.formatTitle(p.dirTitleBecauseNoPredictions),
           nextVehicles: []
         })
-
       } else {
-        for (var j = 0; j < p.direction.length; j++) {
-          var d = p.direction[j];
+
+        var directionsArray = new Array();
+        if (p.direction.length) {
+          directionsArray = p.direction
+        } else {
+          directionsArray.push(p.direction);
+        }
+
+        for (var j = 0; j < directionsArray.length; j++) {
+          var d = directionsArray[j];
 
           var minutesArray = new Array;
-          for (var k = 0; k < d.prediction.length; k++) {
+
+          var dPredictionsArray = new Array();
+          if (d.prediction.length) {
+            dPredictionsArray = d.prediction
+          } else {
+            dPredictionsArray.push(d.prediction);
+          }
+
+          for (var k = 0; k < dPredictionsArray.length; k++) {
             if (k == 3) {
               break;
             }
-            minutesArray.push(Number(d.prediction[k]._attributes.minutes));
+            minutesArray.push(Number(dPredictionsArray[k].minutes));
           }
 
           route.branches.push({
-            title: this.formatTitle(d._attributes.title),
+            title: this.formatTitle(d.title),
             nextVehicles: minutesArray
           })
 
@@ -149,13 +172,13 @@ module.exports = NodeHelper.create({
           if (self.config.routeList[i].color) {
             el.color = self.config.routeList[i].color;
           } 
+          routeList.push(el);
           return el;
         }
       });
-      routeList.push(matchingElement);
     }
 
-    //return the JSON object with index
+    //return the JSON object
     this.sendSocketNotification('MMM-MYTTC-RESPONSE', routeList);
 
   }

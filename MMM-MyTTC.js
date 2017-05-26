@@ -83,7 +83,7 @@ Module.register('MMM-MyTTC', {
     wrapper.classList.add("wrapper");
 
     if (!this.loaded) {
-      wrapper.innerHTML = "Loading...";
+      wrapper.innerHTML = this.translate('LOADING');
       wrapper.className = "dimmed light small";
       return wrapper;
     } else if (this.ttcData == null) { //should never get here, but just in case.
