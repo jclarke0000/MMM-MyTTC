@@ -16,61 +16,44 @@ module.exports = NodeHelper.create({
 
   webServiceURL: "http://webservices.nextbus.com/service/publicJSONFeed",
   agency: "ttc",
-  dataRetriver: null,
 
   start: function() {
     console.log("Starting node_helper for module: " + this.name);
-    this.dataPollStarted = false;
   },
 
   socketNotificationReceived: function(notification, payload){
     if (notification === 'MMM-MYTTC-GET') {
 
-      this.url = '';
-      this.config = payload;
+      var self = this;
 
       var builtURL = this.webServiceURL + "?&command=predictionsForMultiStops&a=" + this.agency;
 
-      var routes = this.config.routeList;
+      var routes = payload.config.routeList;
       for (var i = 0; i < routes.length; i++) {
         builtURL += "&stops=" + routes[i].routeNo + "|" + routes[i].stop;
       }
 
-      this.url = builtURL;
-      //console.log("=============>" + this.url);
+      // console.log("=============>" + builtURL);
 
-      //first data pull
-      this.getTTCTimes();
 
-      if (!this.dataPollStarted) {
-        this.dataPollStarted = true;
-        
+      var xmlHttp = new XMLHttpRequest();
+      xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { //good
 
-        //recurring data pull
-        var self = this;
-        this.dataRetriver = setInterval(function() {
-          self.getTTCTimes();
-        }, this.config.updateInterval);
+          var processedData = self.processJSON(xmlHttp.responseText, payload.config);
+          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.unique, processedData);
+
+        } else if (xmlHttp.readyState == 4) { //bad...
+          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.unique, {data:null});
+        }
       }
+      xmlHttp.open("GET", builtURL, true); // true for asynchronous 
+      xmlHttp.send(null);
+
+
     }
   },
 
-  getTTCTimes: function() {
-    
-    var self = this;
-
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { //good
-        self.processJSON(xmlHttp.responseText);
-      } else if (xmlHttp.readyState == 4) { //bad...
-        self.sendSocketNotification('MMM-MYTTC-RESPONSE', {data:null});
-      }
-    }
-    xmlHttp.open("GET", self.url, true); // true for asynchronous 
-    xmlHttp.send(null);
-
-  },
 
   formatTitle: function(s) {
     var titlePieces = s.split(" - ");
@@ -83,7 +66,7 @@ module.exports = NodeHelper.create({
     return assembledTitle;
   },
 
-  processJSON: function(JSONText) {
+  processJSON: function(JSONText, config) {
 
     var resultList = new Array;
     var rawJSON = JSON.parse(JSONText);
@@ -163,14 +146,14 @@ module.exports = NodeHelper.create({
     //reorder resultList to match config order
     var self = this;
     var routeList = new Array();
-    for (var i = 0; i < this.config.routeList.length; i++) {
+    for (var i = 0; i < config.routeList.length; i++) {
       var matchingElement = resultList.find(function(el) {
-        if (el.routeNo == self.config.routeList[i].routeNo && el.stopTag == self.config.routeList[i].stop) {
-          if (self.config.routeList[i].label) {
-            el.routeTitle = self.config.routeList[i].label;
+        if (el.routeNo == config.routeList[i].routeNo && el.stopTag == config.routeList[i].stop) {
+          if (config.routeList[i].label) {
+            el.routeTitle = config.routeList[i].label;
           }
-          if (self.config.routeList[i].color) {
-            el.color = self.config.routeList[i].color;
+          if (config.routeList[i].color) {
+            el.color = config.routeList[i].color;
           } 
           routeList.push(el);
           return el;
@@ -179,7 +162,7 @@ module.exports = NodeHelper.create({
     }
 
     //return the JSON object
-    this.sendSocketNotification('MMM-MYTTC-RESPONSE', routeList);
+    return routeList
 
   }
 

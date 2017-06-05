@@ -54,16 +54,27 @@ Module.register('MMM-MyTTC', {
 
     Log.info('Starting module: ' + this.name);
 
+    this.UNIQUE_STRING =  Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+
     this.loaded = false; 
     this.ttcData = null;
 
-    //strat getting data
-    this.sendSocketNotification("MMM-MYTTC-GET", this.config);    
+    //start getting data
+    this.getData();
+
+    var self = this;
+    setInterval(function() {
+      self.getData();
+    }, this.config.updateInterval);
+  },
+
+  getData: function() {
+    this.sendSocketNotification("MMM-MYTTC-GET", {unique: this.UNIQUE_STRING, config:this.config});
   },
 
   socketNotificationReceived: function(notification, payload) {
     //only update if a data set is returned.  Otherwise leave stale data on the screen.
-    if ( notification === 'MMM-MYTTC-RESPONSE' && payload != null) {
+    if ( notification === 'MMM-MYTTC-RESPONSE' + this.UNIQUE_STRING && payload != null) {
       this.ttcData = payload;
 
       //only fade in tye module after the first data pull
