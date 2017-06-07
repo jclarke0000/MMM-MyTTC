@@ -41,10 +41,10 @@ module.exports = NodeHelper.create({
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) { //good
 
           var processedData = self.processJSON(xmlHttp.responseText, payload.config);
-          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.unique, processedData);
+          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.instanceId, processedData);
 
         } else if (xmlHttp.readyState == 4) { //bad...
-          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.unique, {data:null});
+          self.sendSocketNotification('MMM-MYTTC-RESPONSE' + payload.instanceId, {data:null});
         }
       }
       xmlHttp.open("GET", builtURL, true); // true for asynchronous 
