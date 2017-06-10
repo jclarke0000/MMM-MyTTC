@@ -96,17 +96,21 @@ Module.register('MMM-MyTTC', {
       wrapper.className = "dimmed light small";
       return wrapper;
     } else if (this.ttcData == null) { //should never get here, but just in case.
-      wrapper.innerHTML = "No Data";
+      wrapper.innerHTML = "No schedule";
       wrapper.className = "dimmed light small";
       return wrapper;
     }
 
+    var noData = true;
     for (var i = 0; i < this.ttcData.length; i++) {
 
       //skip entries with no scheduled times
       if (this.ttcData[i].noSchedule) {
         continue;
       }
+
+      //if execution gets here then we have a schedule for at least one route
+      noData = false;
 
       var routeContainer = document.createElement("div");
       routeContainer.classList.add("route-container");
@@ -168,6 +172,11 @@ Module.register('MMM-MyTTC', {
 
       wrapper.appendChild(routeContainer);
 
+    }
+
+    if (noData) {
+      wrapper.innerHTML = "No schedule";
+      wrapper.className = "dimmed light small";
     }
 
     return wrapper;
