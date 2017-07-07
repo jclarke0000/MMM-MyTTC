@@ -10,7 +10,7 @@ Sadly, TTC's public API doesn't provide subway schedules.  As such, this module 
 
 ## Installation
 1. Navigate into your MagicMirror `modules` folder and execute<br>
-`git clone https://github.com/jclarke0000/MMM-MyCommute.git`.
+`git clone https://github.com/jclarke0000/MMM-MyTTC.git`.
 2. Enter the new `MMM-MyTTC` directory and execute `npm install`.
 
 ## Configuration
