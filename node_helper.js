@@ -14,7 +14,7 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 module.exports = NodeHelper.create({
 
-  webServiceURL: "http://webservices.nextbus.com/service/publicJSONFeed",
+  webServiceURL: "https://retro.umoiq.com/service/publicJSONFeed",
   agency: "ttc",
 
   start: function() {
